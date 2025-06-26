@@ -8,7 +8,7 @@ export default function AccountIcon({ className = "", onClick }: { className?: s
       title="Account"
     >
       <svg
-        className="h-6 w-6 text-white"
+        className="h-8 w-8 text-white"
         fill="none"
         stroke="currentColor"
         strokeWidth="1.8"

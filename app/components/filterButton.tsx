@@ -1,15 +1,24 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown } from "lucide-react"; // optional, if you're using Lucide icons
+import { ChevronDown } from "lucide-react";
 
+interface FilterButtonProps{
+  className? : string,
+  onSelect?: (option: string) => void,
+  role? : string
+}
 export default function FilterButton({
-  className = "",
-  options = ["Status", "Date", "Priority"],
-  onSelect = (option: string) => {},
-}) {
-  const [open, setOpen] = useState(false);
+  className,
+  onSelect = () => {},
+  role
+} : FilterButtonProps) {
 
+
+  const [open, setOpen] = useState(false);
+  console.log("role: ", role)
+  const options = role === 'manager' ? ['assigned', 'in progress', 'completed'] : 
+  ['pending', 'assigned', 'in progress', 'completed'];
   return (
     <div className={`relative inline-block text-left ${className}`}>
       {/* Trigger */}
@@ -20,11 +29,13 @@ export default function FilterButton({
         Filter By
         <ChevronDown className={`w-4 h-4 transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
-
+      
       {/* Dropdown */}
       {open && (
         <div className="absolute z-10 mt-2 w-40 bg-[#1b1b1b] border border-[#303030] rounded-md shadow-lg">
+          
           <ul className="py-1">
+            
             {options.map((option) => (
               <li key={option}>
                 <button

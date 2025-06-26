@@ -1,6 +1,8 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from 'next/navigation'; // or 'next/router' in older versions
+
 
 // definig a custom datatype for the props 
 type AuthFormProps = {
@@ -12,18 +14,17 @@ export default function AuthForm(props: AuthFormProps) {
     const [formData, setformData] = useState({
         email: 'Your email', name: 'Your Name', password: '', confirmPassword: '', role: 'Choose Role'
     })
-
+    const router = useRouter();
     // validatng form 
-    function NoEmptyField(){
-        if(formData.email !== '' && formData.password !== ''){
+    function NoEmptyField() {
+        if (formData.email !== '' && formData.password !== '') {
             // returning true
             return true
         }
-        if(props.form === 'signup')
-        {
-            if(formData.confirmPassword !== '' && formData.name !== ''){
-            return true
-        }
+        if (props.form === 'signup') {
+            if (formData.confirmPassword !== '' && formData.name !== '') {
+                return true
+            }
         }
 
         console.log("none of the field can be empty")
@@ -32,35 +33,34 @@ export default function AuthForm(props: AuthFormProps) {
 
     // validating email
     function validateEmail() {
-    const email = formData.email;
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const email = formData.email;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    if (emailRegex.test(email)) {
-        console.log("Valid email");
-        return true;
-    } else {
-        console.log("Invalid email");
-        return false;
+        if (emailRegex.test(email)) {
+            console.log("Valid email");
+            return true;
+        } else {
+            console.log("Invalid email");
+            return false;
+        }
     }
-}
 
-//  matching the password and the confirm password
-    function validatePasswordandConfirmPassword(){
-        if(formData.password === formData.confirmPassword){
+    //  matching the password and the confirm password
+    function validatePasswordandConfirmPassword() {
+        if (formData.password === formData.confirmPassword) {
             return true
         }
-        else{
+        else {
             console.log("password mismatch")
             return false
         }
     }
 
     // check the password length
-    function passwordLength(){
-        console.log("password" , formData.password)
+    function passwordLength() {
+        console.log("password", formData.password)
         console.log(formData.confirmPassword)
-        if(formData.password.length >= 8)
-        {
+        if (formData.password.length >= 8) {
             return true
         }
         else {
@@ -72,59 +72,105 @@ export default function AuthForm(props: AuthFormProps) {
 
 
     // fucntoin to validate the whole form 
-    function validateForm(){
+    function validateForm() {
         // checking if all the fields are non empty
-        if(!(NoEmptyField())){
+        if (!(NoEmptyField())) {
             return false
         }
         // checking the syntax of the email
-        if(!(validateEmail())){
+        if (!(validateEmail())) {
             return false
         }
 
-        if(!(passwordLength())){
+        if (!(passwordLength())) {
             return false
         }
         // if the form is for signup 
-        if (props.form === 'signup'){
-            if(!(validatePasswordandConfirmPassword())){
-            return false
-        }
+        if (props.form === 'signup') {
+            if (!(validatePasswordandConfirmPassword())) {
+                return false
+            }
         }
 
         return true
     }
 
-    // login handler function when the login button is clicked
-    function loginHandler() {
-        let email: String = formData.email;
-        let password: String = formData.password;
+    // login handler function when the login button is clicked 
+    async function loginHandler() {
+        const { email, password } = formData;
 
-        
-        if(validateForm()){
-            // api call for login
-            console.log("Login Api call.")
+        if (validateForm()) {
+            try {
+                const response = await fetch("http://192.168.162.64:5000/api/auth/login", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ email, password }),
+                });
+
+                if (!response.ok) {
+                    throw new Error("Login failed");
+                }
+
+                const data = await response.json();
+                console.log("Login successful:", data);
+
+                // storing the data in the frontend
+                // Example login success handler
+                localStorage.setItem('user', JSON.stringify(data));
+
+                router.push('/dashboard');
+
+                // //  sotring token 
+                // document.cookie = `token=${data.id}; path=/;`;
+                // console.log(document.cookie)
+
+            } catch (error) {
+                if (error instanceof Error) {
+                    console.error("Error during login:", error.message);
+                    console.log()
+                } else {
+                    console.error("Unknown error:", error);
+                }
+            }
         }
-
-        
-
-        
     }
+
 
     // signup handler funcoitn for the signup button click
-    function signupHandler() {
-        let email: String = formData.email;
-        let password: String = formData.password;
-        let confirmPassword: String = formData.confirmPassword;
-        let name: String = formData.name;
-        let role: String = formData.role;
+    async function signupHandler() {
+    const { email, name, password, confirmPassword } = formData;
+    let role = formData.role.toLowerCase();
 
-        if(validateForm()){
-            // api call for signup
-            console.log("singnup Api call.")
+
+
+    if (validateForm()) {
+        try {
+            const response = await fetch("http://192.168.162.64:5000/api/auth/signup", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ email, password, name, role }),
+            });
+
+            if (!response.ok) {
+                throw new Error("Signup failed");
+            }
+
+            const data = await response.json();
+            console.log("Signup successful:", data);
+        } catch (error) {
+            if (error instanceof Error) {
+                    console.error("Error during signup:", error.message);
+                } else {
+                    console.error("Unknown error:", error);
+                }
         }
-
     }
+}
+
 
 
     return (
@@ -136,7 +182,7 @@ export default function AuthForm(props: AuthFormProps) {
 
                 <input
                     type="email"
-                    placeholder= {formData.email}
+                    placeholder={formData.email}
                     onChange={(e) => setformData({ ...formData, email: e.target.value })}
                     className="w-full p-3 rounded-lg bg-[#1b1b1b] text-white placeholder-[#929292] focus:outline-none focus:ring-2 focus:ring-[#34b7ff]"
                 />

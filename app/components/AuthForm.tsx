@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from 'next/navigation'; // or 'next/router' in older versions
+import Cookies from 'js-cookie';
 
 
 // definig a custom datatype for the props 
@@ -103,6 +104,7 @@ export default function AuthForm(props: AuthFormProps) {
             try {
                 const response = await fetch("http://192.168.162.64:5000/api/auth/login", {
                     method: "POST",
+                    credentials: "include",
                     headers: {
                         "Content-Type": "application/json",
                     },
@@ -140,36 +142,41 @@ export default function AuthForm(props: AuthFormProps) {
 
     // signup handler funcoitn for the signup button click
     async function signupHandler() {
-    const { email, name, password, confirmPassword } = formData;
-    let role = formData.role.toLowerCase();
+        const { email, name, password, confirmPassword } = formData;
+        let role = formData.role.toLowerCase();
 
 
 
-    if (validateForm()) {
-        try {
-            const response = await fetch("http://192.168.162.64:5000/api/auth/signup", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ email, password, name, role }),
-            });
+        if (validateForm()) {
+            try {
+                const response = await fetch("http://192.168.162.64:5000/api/auth/signup", {
+                    method: "POST",
+                    credentials: "include",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ email, password, name, role }),
+                });
 
-            if (!response.ok) {
-                throw new Error("Signup failed");
-            }
+                if (!response.ok) {
+                    throw new Error("Signup failed");
+                }
 
-            const data = await response.json();
-            console.log("Signup successful:", data);
-        } catch (error) {
-            if (error instanceof Error) {
+                const data = await response.json();
+                console.log("Signup successful:", data);
+                const token = data.token;
+                Cookies.set('token', token, {
+                    expires: 7,          // expires in 7 days
+                });
+            } catch (error) {
+                if (error instanceof Error) {
                     console.error("Error during signup:", error.message);
                 } else {
                     console.error("Unknown error:", error);
                 }
+            }
         }
     }
-}
 
 
 

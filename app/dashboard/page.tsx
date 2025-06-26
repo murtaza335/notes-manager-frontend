@@ -19,14 +19,24 @@ export default function Dashboard() {
     if (storedUser) {
       try {
         const parsed = JSON.parse(storedUser);
-        const token = parsed.token; // adjust based on your data structure
         setRole(parsed.user.role?.toLowerCase() || '');
+
+        // const token = Cookies.get('jwt');
+        // console.log("token", token)
+        let user: { name: string; role: string , token: string} | null = null;
+        user = JSON.parse(storedUser);
+        // user = JSON.(user)
+        if(!user){
+          return
+        }
+        console.log(user.token)
 
         const response = await fetch(`http://192.168.162.64:5000/api/task/${role}-tasks`, {
           method: "GET",
           credentials: "include",
           headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "authorization": user.token
             
           },
         });

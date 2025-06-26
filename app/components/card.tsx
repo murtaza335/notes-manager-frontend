@@ -1,35 +1,29 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
 type Status = 'pending' | 'assigned' | 'inprogress' | 'completed' | string;
 
-
-type Task = {
+export type Task = {
   id: number;
   title: string;
   description: string;
+  tag: string;
   status: Status;
+  createdById: number;
+  assignedToId: number | null;
+  createdAt: string;
+  updatedAt: string;
 };
 
-interface taskListProps{
-  role? : string
+interface TaskCardProps {
+  task: Task;
+  role?: string;
+  onEdit?: (id: number) => void;
+  onDelete?: (id: number) => void;
 }
 
-export default function TaskList({role}: taskListProps) {
-  
-
-  // Dummy task data
-  const tasks: Task[] = [
-    { id: 1, title: 'Task One', description: 'Prepare project docs', status: 'pending' },
-    { id: 2, title: 'Task Two', description: 'Assign team members', status: 'assigned' },
-    { id: 3, title: 'Task Three', description: 'Approval for budget', status: 'inprogress' },
-    { id: 4, title: 'Task Four', description: 'Implement API routes', status: 'inprogress' },
-    { id: 5, title: 'Task Five', description: 'Finalize UI design', status: 'completed' },
-  ];
-
-
-
+const TaskCard: React.FC<TaskCardProps> = ({ task, role , onDelete, onEdit}) => {
   const getStatusColor = (status: Status) => {
     switch (status) {
       case 'pending':
@@ -49,10 +43,12 @@ export default function TaskList({role}: taskListProps) {
     if (status === 'pending' && role === 'employee') {
       return (
         <>
-          <button className="px-4 py-2 bg-[#34b7ff] text-white text-sm rounded-md hover:bg-[#2aa9ed] transition shadow-sm">
+          <button className="px-4 py-2 bg-[#34b7ff] text-white text-sm rounded-md hover:bg-[#2aa9ed] transition shadow-sm"
+          onClick={() => onEdit?.(task.id)}>
             Edit
           </button>
-          <button className="px-4 py-2 bg-red-600 text-white text-sm rounded-md hover:bg-red-700 transition shadow-sm">
+          <button className="px-4 py-2 bg-red-600 text-white text-sm rounded-md hover:bg-red-700 transition shadow-sm"
+          onClick={() => onDelete?.(task.id)}>
             Delete
           </button>
         </>
@@ -75,10 +71,9 @@ export default function TaskList({role}: taskListProps) {
     if (status === 'pending' && role === 'admin') {
       return (
         <div>
-        <button className="ml-4 px-4 py-2 bg-purple-600 text-white text-sm rounded-md hover:bg-purple-700 transition shadow-sm">
-          Assign
-        </button>
-        
+          <button className="ml-4 px-4 py-2 bg-purple-600 text-white text-sm rounded-md hover:bg-purple-700 transition shadow-sm">
+            Assign
+          </button>
           <button className="ml-2 px-4 py-2 bg-red-600 text-white text-sm rounded-md hover:bg-red-700 transition shadow-sm">
             Delete
           </button>
@@ -96,42 +91,53 @@ export default function TaskList({role}: taskListProps) {
 
     return null;
   };
-  let filteredTasks: Task[] = tasks; // default to all tasks
-  // filtering the tasks based on the user role 
-  if (role === "manager"){
-   filteredTasks = tasks.filter(task => task.status === 'assigned' || task.status === 'inprogress')
-  }
+
+  const formatDate = (dateStr: string) =>
+    new Date(dateStr).toLocaleString('en-GB');
+
   return (
+    <div
+      key={task.id}
+      className="relative w-full rounded-xl p-5 bg-[#2a2a2a] border border-[#929292] shadow-md transition hover:bg-[#1f1f1f]"
+    >
+      {/* Status Tag */}
+      <span
+        className={`absolute top-3 right-4 text-white text-xs font-semibold px-3 py-1 rounded-full capitalize shadow-sm ${getStatusColor(
+          task.status
+        )}`}
+      >
+        {task.status}
+      </span>
 
-    <div className="grid gap-6 p-6 md:grid-cols-2 lg:grid-cols-3">
-      
-      {filteredTasks.map((task) => (
+      {/* Title */}
+      <h2 className="text-xl font-semibold text-white mb-1">{task.title}</h2>
 
-        <div
-          key={task.id}
-          className="relative w-full rounded-xl p-5 bg-[#2a2a2a] border border-[#929292] shadow-md transition hover:bg-[#1f1f1f]"
-        >
-          {/* Status Tag */}
-          <span
-            className={`absolute top-3 right-4 text-white text-xs font-semibold px-3 py-1 rounded-full capitalize shadow-sm ${getStatusColor(
-              task.status
-            )}`}
-          >
-            {task.status}
-          </span>
+      {/* Description */}
+      <p className="text-sm text-[#929292] mb-1">{task.description}</p>
 
-          {/* Title */}
-          <h2 className="text-xl font-semibold text-white mb-2">{task.title}</h2>
+      {/* Tag */}
+      <p className="text-xs text-gray-400 mb-1">Tag: {task.tag}</p>
 
-          {/* Description */}
-          <p className="text-sm text-[#929292]">{task.description}</p>
+      {/* Creator & Assignee */}
+      <p className="text-xs text-gray-500 mb-1">
+        Created By: {task.createdById}, Assigned To:{' '}
+        {task.assignedToId ?? 'Unassigned'}
+      </p>
 
-          {/* Buttons */}
-          <div className="mt-4 flex justify-end space-x-2">
-            {renderButtons(task.status)}
-          </div>
-        </div>
-      ))}
+      {/* Dates */}
+      <p className="text-xs text-gray-600 mb-1">
+        Created At: {formatDate(task.createdAt)}
+      </p>
+      <p className="text-xs text-gray-600">
+        Updated At: {formatDate(task.updatedAt)}
+      </p>
+
+      {/* Action Buttons */}
+      <div className="mt-4 flex justify-end space-x-2">
+        {renderButtons(task.status)}
+      </div>
     </div>
   );
-}
+};
+
+export default TaskCard;

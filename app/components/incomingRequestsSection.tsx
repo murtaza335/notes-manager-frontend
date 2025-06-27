@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import IncomingRequestCard from './incomingRequestCard';
 
 interface User {
+  id: string;
   name: string;
   email: string;
   role: string;

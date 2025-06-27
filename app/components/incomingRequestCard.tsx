@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { CheckCircle, XCircle } from 'lucide-react';
 
 interface User {
-  id : string;
+  id: number;
   name: string;
   email: string;
   role: string;
@@ -39,7 +39,7 @@ export default function IncomingRequestCard({ user, index, onAction }: IncomingR
       if (!res.ok) throw new Error('Failed to approve user');
 
       console.log('User approved:', user.id);
-      onAction?.(user.id); // notify parent
+      onAction?.(user.email); // notify parent
     } catch (err) {
       console.error(err);
     } finally {

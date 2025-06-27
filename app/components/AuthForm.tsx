@@ -15,7 +15,7 @@ type AuthFormProps = {
 export default function AuthForm(props: AuthFormProps) {
 
     const [formData, setformData] = useState({
-        email: 'Your email', name: 'Your Name', password: '', confirmPassword: '', role: 'Choose Role'
+        email: 'Your email', name: 'Your Name', password: '', confirmPassword: '', role: 'Manager'
     })
     const router = useRouter();
     // validatng form 

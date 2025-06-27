@@ -1,20 +1,17 @@
 "use client"
 import TaskList from "../components/taskList";
-import dotenv from 'dotenv';
-dotenv.config();
+import IncomingRequestsList from "../components/incomingRequestsSection";
 
 
 import { useState, useEffect } from "react";
-import Card from "../components/card";
 import FeaturesBar from "../components/featuresBar";
-import Cookies from 'js-cookie';
 
 
 type Role = 'employee' | 'manager' | 'admin' | string;
 
 export default function Dashboard() {
 
-  const [role, setRole] = useState<Role>('admin');
+  const [role, setRole] = useState<Role>('');
 
   // 
   useEffect(() => {
@@ -22,14 +19,16 @@ export default function Dashboard() {
     if (storedUser) {
       try {
         const parsed = JSON.parse(storedUser);
+        console.log("Parsed user:", parsed.user.role);
         setRole(parsed.user.role?.toLowerCase() || '');
       }
       catch (err) {
         console.error("Error parsing user", err);
       }
     }
-      
-    }, []);
+
+  }, []);
+  console.log("Role in dashboard:", role);
 
 
   return (
@@ -39,8 +38,11 @@ export default function Dashboard() {
 
 
       {/* Main Body */}
-      <div className="dashboard-body space-y-4">
+      <div className="dashboard-body space-y-4 flex">
         <TaskList role={role} />
+        {role === "admin" &&
+          <IncomingRequestsList className="w-100"/>
+        }
       </div>
 
     </div>

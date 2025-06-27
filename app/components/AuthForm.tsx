@@ -104,7 +104,7 @@ export default function AuthForm(props: AuthFormProps) {
 
         if (validateForm()) {
             try {
-                const response = await fetch(`${BASE_URL}/api/auth/login`, {
+                const response = await fetch(`http://192.168.162.4:5000/api/auth/login`, {
                     method: "POST",
                     credentials: "include",
                     headers: {
@@ -151,7 +151,7 @@ export default function AuthForm(props: AuthFormProps) {
 
         if (validateForm()) {
             try {
-                const response = await fetch(`${BASE_URL}/api/auth/signup`, {
+                const response = await fetch(`http://192.168.162.4:5000/api/auth/signup`, {
                     method: "POST",
                     credentials: "include",
                     headers: {

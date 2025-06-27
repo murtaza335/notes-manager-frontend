@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { CheckCircle, XCircle } from 'lucide-react';
 
 interface User {
+  id : string;
   name: string;
   email: string;
   role: string;
